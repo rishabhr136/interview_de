@@ -435,3 +435,46 @@ A very strong candidate might say:
 
 
 
+Explain the role of PySpark’s Catalyst optimizer.
+The Catalyst Optimizer is a core component of Spark SQL and PySpark that optimizes query execution plans for better performance. It plays a critical role in transforming logical queries into efficient physical execution plans.
+
+Logical Plan Optimization :
+
+Converts user-written SQL or DataFrame operations into an optimized logical plan.
+Applies rules like predicate pushdown, column pruning, and constant folding to simplify queries.
+Physical Plan Generation :
+
+Translates the optimized logical plan into a physical plan that can be executed on the cluster.
+Chooses the most efficient algorithms for operations like joins, aggregations, and filters.
+Cost-Based Optimization (CBO) :
+
+Uses statistics about data (e.g., size, distribution) to make decisions like choosing between broadcast joins and shuffle joins.
+Code Generation :
+
+Generates optimized Java byte code for execution, reducing runtime overhead.
+df = spark.read.csv("data.csv")
+optimized_df = df.filter(df["age"] > 30).select("name", "age")
+optimized_df.explain()  # Displays the optimized execution plan
+
+
+
+
+ Explain the concept of watermarking in PySpark streaming.
+Watermarking in PySpark Structured Streaming is used to handle late-arriving data and limit the state maintained during stream processing. It defines a threshold for how long the system should wait for delayed events before discarding them.
+
+Event Time : The timestamp associated with each record.
+Watermark : A threshold based on event time, beyond which late data is ignored.
+from pyspark.sql.functions import col, window
+# Define a streaming DataFrame
+stream_df = spark.readStream.format("kafka").option("subscribe", "topic").load()
+# Apply watermarking
+windowed_counts = stream_df \
+    .withWatermark("event_time", "10 minutes") \
+    .groupBy(window(col("event_time"), "5 minutes")) \
+    .count()
+# Write output
+query = windowed_counts.writeStream.outputMode("update").format("console").start()
+query.awaitTermination()
+Benefits :
+Reduces memory usage by limiting the state for late-arriving data.
+Ensures timely processing by ignoring excessively delayed records.
